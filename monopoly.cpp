@@ -8,6 +8,7 @@ using namespace std;
 int jail = 10;
 int gtj = 30;
 int size = 40;
+int playercount = 4;
 int turns = 10000000;
 
 struct Player{
@@ -190,13 +191,15 @@ int main(){
     for(i=0; i<size; i++){
         tiles[i] = 0;
     }
-    struct Player p1 = {0,0,false,false};
+    Player players[playercount-1] = {0,0,false,false};
+
     for(i=0; i<turns; i++){
-        move(p1, tiles, chance, community);
+        for(int j = 0; j<playercount; j++)
+        move(players[j], tiles, chance, community);
     }
-    printf("Player Tile %d\n", p1.tile);
+    printf("There are %d player\n", playercount);
     for(i=0; i<size; i++){
-        double percent = tiles[i]/(double)turns;
+        double percent = tiles[i]/((double)turns*playercount);
         printf("Percent of lands on %d: %f\n", i, percent);
     }
     for(i=0; i<size; i++){
