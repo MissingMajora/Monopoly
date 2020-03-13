@@ -10,6 +10,7 @@ int gtj = 30;
 int size = 40;
 int playercount = 4;
 int turns = 10000000;
+int cardcount =16;
 
 struct Player{
     int tile;
@@ -20,6 +21,7 @@ struct Player{
 
 typedef void (*Cards) (Player &player);
 
+//Below are all of the functions that will act as the Chance and Community Chest cards
 void toGo(Player &player){
     player.money += 200;
     player.tile = 0;
@@ -78,12 +80,14 @@ void toBoardWalk(Player &player){
 }
 
 
-
+//Controlls the movement of players
+//Players roll two dice then move that number of tiles forward
+//if a player rolles doubles three times in a row they go to jail
+//landing on "go to jail" sends them to jail immediately and increments the jail tiles count
 void move(Player &player, int* tiles, Cards* chance, Cards* community){
     int i = 0;
     int d1 = rand()%6+1;
     int d2 = rand()%6+1;
-    //printf("Rolled %d\n", d1+d2);
     if(player.tile+d1+d2 == gtj){
         player.tile= jail;
         tiles[player.tile] += 1;
@@ -106,7 +110,6 @@ void move(Player &player, int* tiles, Cards* chance, Cards* community){
     tiles[player.tile] += 1;
     d1 = rand()%6+1;
     d2 = rand()%6+1;
-    //printf("Rolled %d\n", d1+d2);
     if(player.tile+d1+d2 == gtj){
         player.tile= jail;
         tiles[player.tile] += 1;
@@ -129,7 +132,6 @@ void move(Player &player, int* tiles, Cards* chance, Cards* community){
     tiles[player.tile] += 1;
     d1 = rand()%6+1;
     d2 = rand()%6+1;
-    //printf("Rolled %d\n", d1+d2);
     if(d1 == d2){
         player.tile = jail;
         tiles[jail] += 1;
@@ -143,7 +145,7 @@ int main(){
     unsigned seed = time(0);
     srand(seed);
     int tiles[size];
-    int i = 0;
+    Player players[playercount-1] = {0,0,false,false};
     Cards chance[] = {
         toGo,
         toIllAve,
@@ -163,12 +165,6 @@ int main(){
         getMoney,
     };
     random_shuffle(begin(chance), end(chance));
-    int length = sizeof(chance) / sizeof(*chance);
-    /*
-    for(i=0; i<length; i++){
-        printf("On iter %d this is the function pointer: %p \n", i, chance[i]);
-    }
-    */
     Cards community[] = {
         toGo,
         getMoney,
@@ -187,23 +183,28 @@ int main(){
         getMoney,
         getMoney
     };
+    int i = 0;
     random_shuffle(begin(community), end(community));
+    //Set the number of times that tiles have been landed on to zero
     for(i=0; i<size; i++){
         tiles[i] = 0;
     }
-    Player players[playercount-1] = {0,0,false,false};
-
+    //simulated a number of turns for all players
     for(i=0; i<turns; i++){
         for(int j = 0; j<playercount; j++)
         move(players[j], tiles, chance, community);
     }
+
     printf("There are %d player\n", playercount);
+    //Show the percentage of how many times the tile was landed on
     for(i=0; i<size; i++){
         double percent = tiles[i]/((double)turns*playercount);
         printf("Percent of lands on %d: %f\n", i, percent);
     }
+    //Show the number of times a tile was landed on
     for(i=0; i<size; i++){
         printf("Number of lands on %d: %d\n", i, tiles[i]);
     }
+
     return 1;
 }
